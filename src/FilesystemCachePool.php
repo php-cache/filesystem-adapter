@@ -21,6 +21,7 @@ use Psr\Cache\CacheItemInterface;
  */
 class FilesystemCachePool extends AbstractCachePool
 {
+    const CACHE_PATH = 'cache';
     /**
      * @var Filesystem
      */
@@ -32,18 +33,23 @@ class FilesystemCachePool extends AbstractCachePool
     public function __construct(Filesystem $filesystem)
     {
         $this->filesystem = $filesystem;
-        $this->filesystem->createDir('cache');
+        $this->filesystem->createDir(self::CACHE_PATH);
     }
 
     protected function fetchObjectFromCache($key)
     {
-        return $this->filesystem->read($key);
+        $file = $this->getFilePath($key);
+        if (!$this->filesystem->has($file)) {
+            return;
+        }
+
+        return unserialize($this->filesystem->read($file));
     }
 
     protected function clearAllObjectsFromCache()
     {
-        $this->filesystem->deleteDir('cache');
-        $this->filesystem->createDir('cache');
+        $this->filesystem->deleteDir(self::CACHE_PATH);
+        $this->filesystem->createDir(self::CACHE_PATH);
 
         return true;
     }
@@ -51,7 +57,7 @@ class FilesystemCachePool extends AbstractCachePool
     protected function clearOneObjectFromCache($key)
     {
         try {
-            return $this->filesystem->delete($key);
+            return $this->filesystem->delete($this->getFilePath($key));
         } catch (FileNotFoundException $e) {
             return true;
         }
@@ -59,6 +65,21 @@ class FilesystemCachePool extends AbstractCachePool
 
     protected function storeItemInCache($key, CacheItemInterface $item, $ttl)
     {
-        return $this->filesystem->write($key, $item);
+        $file = $this->getFilePath($key);
+        if ($this->filesystem->has($file)) {
+            $this->filesystem->delete($file);
+        }
+
+        return $this->filesystem->write($file, serialize($item));
+    }
+
+    /**
+     * @param $key
+     *
+     * @return mixed
+     */
+    private function getFilePath($key)
+    {
+        return sprintf('%s/%s', self::CACHE_PATH, urlencode(base64_encode($key)));
     }
 }
