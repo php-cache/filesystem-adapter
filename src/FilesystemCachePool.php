@@ -23,7 +23,7 @@ class FilesystemCachePool extends AbstractCachePool
 {
     const CACHE_PATH = 'cache';
     /**
-     * @var Filesystem
+     * @type Filesystem
      */
     private $filesystem;
 
