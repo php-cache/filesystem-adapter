@@ -19,7 +19,7 @@ use League\Flysystem\Filesystem;
 class IntegrationTagTest extends TaggableCachePoolTest
 {
     /**
-     * @var Filesystem
+     * @type Filesystem
      */
     private $filesystem;
 

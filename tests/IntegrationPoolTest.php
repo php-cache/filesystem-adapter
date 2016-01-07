@@ -19,7 +19,7 @@ use League\Flysystem\Filesystem;
 class IntegrationPoolTest extends CachePoolTest
 {
     /**
-     * @var Filesystem
+     * @type Filesystem
      */
     private $filesystem;
 
