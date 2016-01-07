@@ -12,6 +12,7 @@
 namespace Cache\Adapter\Filesystem;
 
 use Cache\Adapter\Common\AbstractCachePool;
+use Cache\Adapter\Common\Exception\InvalidArgumentException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem;
 use Psr\Cache\CacheItemInterface;
@@ -74,12 +75,17 @@ class FilesystemCachePool extends AbstractCachePool
     }
 
     /**
-     * @param $key
+     * @param string $key
      *
-     * @return mixed
+     * @return string
+     * @throws InvalidArgumentException
      */
     private function getFilePath($key)
     {
-        return sprintf('%s/%s', self::CACHE_PATH, urlencode(base64_encode($key)));
+        if (!preg_match('|^[a-zA-Z0-9_\.: ]+$|', $key)) {
+            throw new InvalidArgumentException(sprintf('Invalid key "%s". Valid keys must match [a-zA-Z0-9_\.:].', $key));
+        }
+
+        return sprintf('%s/%s', self::CACHE_PATH, $key);
     }
 }
