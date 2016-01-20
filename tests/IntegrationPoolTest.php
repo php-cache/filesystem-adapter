@@ -9,31 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Cache\Adapter\Filesystem\tests;
+namespace Cache\Adapter\Filesystem\Tests;
 
-use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Cache\IntegrationTests\CachePoolTest;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 
 class IntegrationPoolTest extends CachePoolTest
 {
-    /**
-     * @type Filesystem
-     */
-    private $filesystem;
-
-    public function createCachePool()
-    {
-        return new FilesystemCachePool($this->getFilesystem());
-    }
-
-    private function getFilesystem()
-    {
-        if ($this->filesystem === null) {
-            $this->filesystem = new Filesystem(new Local(__DIR__.'/'));
-        }
-
-        return $this->filesystem;
-    }
+    use CreatePoolTrait;
 }
