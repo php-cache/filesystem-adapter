@@ -41,10 +41,15 @@ class FilesystemCachePool extends AbstractCachePool
     {
         $file = $this->getFilePath($key);
         if (!$this->filesystem->has($file)) {
-            return;
+            return [false, null];
         }
 
-        return unserialize($this->filesystem->read($file));
+        $data = unserialize($this->filesystem->read($file));
+        if (time() > $data[0]) {
+            return [false, null];
+        }
+
+        return [true, $data[1]];
     }
 
     protected function clearAllObjectsFromCache()
@@ -71,19 +76,20 @@ class FilesystemCachePool extends AbstractCachePool
             $this->filesystem->delete($file);
         }
 
-        return $this->filesystem->write($file, serialize($item));
+        return $this->filesystem->write($file, serialize([time() + $ttl, $item->get()]));
     }
 
     /**
      * @param string $key
      *
-     * @return string
      * @throws InvalidArgumentException
+     *
+     * @return string
      */
     private function getFilePath($key)
     {
-        if (!preg_match('|^[a-zA-Z0-9_\.: ]+$|', $key)) {
-            throw new InvalidArgumentException(sprintf('Invalid key "%s". Valid keys must match [a-zA-Z0-9_\.:].', $key));
+        if (!preg_match('|^[a-zA-Z0-9_\.! ]+$|', $key)) {
+            throw new InvalidArgumentException(sprintf('Invalid key "%s". Valid keys must match [a-zA-Z0-9_\.! ].', $key));
         }
 
         return sprintf('%s/%s', self::CACHE_PATH, $key);
