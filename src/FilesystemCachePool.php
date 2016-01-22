@@ -45,7 +45,7 @@ class FilesystemCachePool extends AbstractCachePool
         }
 
         $data = unserialize($this->filesystem->read($file));
-        if (time() > $data[0]) {
+        if ($data[0] !== null && time() > $data[0]) {
             return [false, null];
         }
 
@@ -76,7 +76,10 @@ class FilesystemCachePool extends AbstractCachePool
             $this->filesystem->delete($file);
         }
 
-        return $this->filesystem->write($file, serialize([time() + $ttl, $item->get()]));
+        return $this->filesystem->write($file, serialize([
+            ($ttl === null ? null : time() + $ttl),
+            $item->get(),
+        ]));
     }
 
     /**
