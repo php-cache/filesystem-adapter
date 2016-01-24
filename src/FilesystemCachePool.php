@@ -46,6 +46,8 @@ class FilesystemCachePool extends AbstractCachePool
 
         $data = unserialize($this->filesystem->read($file));
         if ($data[0] !== null && time() > $data[0]) {
+            $this->clearOneObjectFromCache($key);
+
             return [false, null];
         }
 

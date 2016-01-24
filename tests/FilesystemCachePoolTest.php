@@ -27,4 +27,21 @@ class FilesystemCachePoolTest extends \PHPUnit_Framework_TestCase
 
         $pool->getItem('test%string')->get();
     }
+
+    public function testCleanupOnExpire()
+    {
+        $pool = $this->createCachePool();
+
+        $item = $pool->getItem('test_ttl_null');
+        $item->set('data');
+        $item->expiresAt(new \DateTime('now'));
+        $pool->save($item);
+        $this->assertTrue($this->getFilesystem()->has('cache/test_ttl_null'));
+
+        sleep(1);
+
+        $item = $pool->getItem('test_ttl_null');
+        $this->assertFalse($item->isHit());
+        $this->assertFalse($this->getFilesystem()->has('cache/test_ttl_null'));
+    }
 }
