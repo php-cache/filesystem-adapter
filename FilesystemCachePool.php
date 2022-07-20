@@ -155,7 +155,9 @@ class FilesystemCachePool extends AbstractCachePool
     protected function getList($name)
     {
         $file = $this->getFilePath($name);
-        $this->filesystem->write($file, serialize([]));
+        if (!$this->filesystem->has($file)) {
+            $this->filesystem->write($file, serialize([]));
+        }
 
         return unserialize($this->filesystem->read($file));
     }
